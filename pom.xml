@@ -4,11 +4,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.github.enr</groupId>
-  <artifactId>ideal-winner</artifactId>
-  <version>0.3.0-SNAPSHOT</version>
+  <artifactId>returns</artifactId>
+  <version>0.0.0-SNAPSHOT</version>
 
-  <name>ideal-winner</name>
-  <url>https://github.com/enr/ideal-winner</url>
+  <name>returns</name>
+  <url>https://github.com/enr/returns</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

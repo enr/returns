@@ -1,10 +1,10 @@
-# ideal-winner
+# returns
 
-![CI](https://github.com/enr/ideal-winner/workflows/CI/badge.svg)
+![CI](https://github.com/enr/returns/workflows/CI/badge.svg)
 
-[![](https://jitpack.io/v/enr/ideal-winner.svg)](https://jitpack.io/#enr/ideal-winner)
+[![](https://jitpack.io/v/enr/returns.svg)](https://jitpack.io/#enr/returns)
 
-Java library template
+Types to return in your methods 
 
 ## Development
 
@@ -52,7 +52,7 @@ Add the dependency
 ```xml
 <dependency>
     <groupId>com.github.enr</groupId>
-    <artifactId>ideal-winner</artifactId>
-    <version>${idealwinner.version}</version>
+    <artifactId>returns</artifactId>
+    <version>${returns.version}</version>
 </dependency>
 ```

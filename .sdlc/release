@@ -40,6 +40,7 @@ BASE=$(git merge-base @ "$upstream")
   exit 1
 }
 
+tag_prefix=''
 release_suffix=''
 group_id='com.github.enr'
 artifact_id='returns'
@@ -62,7 +63,7 @@ echo "Release version ${release_version}"
 snapshot_version="${2}-SNAPSHOT"
 echo "Snapshot version ${snapshot_version}"
 
-tag_name="v${release_version}"
+tag_name="${tag_prefix}${release_version}"
 tag_exists=$(git tag -l "${tag_name}")
 [[ -n "$tag_exists" ]] && {
   echo "Tag ${tag_name} exists: aborting release"

@@ -42,7 +42,7 @@ BASE=$(git merge-base @ "$upstream")
 
 release_suffix=''
 group_id='com.github.enr'
-artifact_id='ideal-winner'
+artifact_id='returns'
 snapshot_commit_prefix=''
 # snapshot_commit_prefix='[skip ci]'
 

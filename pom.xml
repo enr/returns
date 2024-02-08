@@ -5,7 +5,7 @@
 
   <groupId>com.github.enr</groupId>
   <artifactId>returns</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.3-SNAPSHOT</version>
 
   <name>returns</name>
   <url>https://github.com/enr/returns</url>

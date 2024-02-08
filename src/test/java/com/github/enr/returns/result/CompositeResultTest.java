@@ -27,12 +27,13 @@ class CompositeResultTest {
   }
 
   @Test
-  void compositeResult() {
+  void partialResult() {
     String payload = "payload-" + RandomStrings.withLength(6);
     String fallback = "fallback-" + RandomStrings.withLength(6);
     CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
     sut.add(Result.success(payload));
     sut.add(Result.failingWithMessage("oh no"));
+    assertThat(sut.isPartial()).as("is partial").isTrue();
     assertThat(sut.explanation()).as("error").contains("errors");
     assertThat(sut.unwrap()).as("success result").hasSize(1).contains(payload);
     assertThat(sut.orElse(List.of(fallback))).as("fallback").containsExactly(fallback);

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions;
 
 import com.github.enr.returns.result.Failure;
 import com.github.enr.returns.result.Result;
+import com.github.enr.returns.result.Skip;
 import com.github.enr.returns.result.Success;
 
 public class ResultAssertions {
@@ -29,6 +30,18 @@ public class ResultAssertions {
   }
 
   public static <T> void verifyFailure(Result<T> result, String errorMessage, T fallback) {
+    verifyFailure(result, fallback);
+    assertThat(result.explanation()).as("explanation").isEqualTo(errorMessage);
+    assertThat(result.cause()).as("cause").isEmpty();
+  }
+
+  public static <T> void verifyFailure(Result<T> result, Throwable cause, T fallback) {
+    verifyFailure(result, fallback);
+    assertThat(result.explanation()).as("explanation").isEqualTo(cause.getMessage());
+    assertThat(result.cause()).as("cause").contains(cause);
+  }
+
+  public static <T> void verifyFailure(Result<T> result, T fallback) {
     assertThat(result).as("result").isInstanceOf(Failure.class);
     assertThat(result.isSuccessful()).as("is successful").isFalse();
     assertThat(result.isSkipped()).as("is skipped").isFalse();
@@ -37,9 +50,18 @@ public class ResultAssertions {
     Assertions.assertThrows(NoSuchElementException.class, () -> result.unwrap());
     assertThat(result.toOptional()).as("optional").isEmpty();
     assertThat(result.orElse(fallback)).as("or else").isEqualTo(fallback);
-    assertThat(result.explanation()).as("explanation").isEqualTo(errorMessage);
-    assertThat(result.cause()).as("cause").isEmpty();
   }
 
-  public static <T> void verifySkip(Result<T> result, T fallback) {}
+  public static <T> void verifySkip(Result<T> result, String reason, T fallback) {
+    assertThat(result).as("result").isInstanceOf(Skip.class);
+    assertThat(result.isSuccessful()).as("is successful").isFalse();
+    assertThat(result.isSkipped()).as("is skipped").isTrue();
+    assertThat(result.isFailed()).as("is failed").isFalse();
+    assertThat(result.isComposite()).as("is composite").isFalse();
+    Assertions.assertThrows(NoSuchElementException.class, () -> result.unwrap());
+    assertThat(result.toOptional()).as("optional").isEmpty();
+    assertThat(result.orElse(fallback)).as("or else").isEqualTo(fallback);
+    assertThat(result.explanation()).as("explanation").isEqualTo(reason);
+    assertThat(result.cause()).as("cause").isEmpty();
+  }
 }

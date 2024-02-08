@@ -1,6 +1,7 @@
 package com.github.enr.returns.result;
 
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -9,7 +10,7 @@ public final class Success<T> implements Result<T> {
   private final T value;
 
   public Success(T value) {
-    this.value = value;
+    this.value = Objects.requireNonNull(value, "Value must not be null");
   }
 
   @Override
@@ -26,9 +27,9 @@ public final class Success<T> implements Result<T> {
    */
   @Override
   public T unwrap() {
-    if (value == null) {
-      throw new NoSuchElementException("No value present");
-    }
+    // if (value == null) {
+    // throw new NoSuchElementException("No value present");
+    // }
     return value;
   }
 

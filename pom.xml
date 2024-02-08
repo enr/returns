@@ -111,7 +111,25 @@
                         <limit>
                           <counter>LINE</counter>
                           <value>COVEREDRATIO</value>
-                          <minimum>0.59</minimum>
+                          <minimum>0.75</minimum>
+                        </limit>
+                      </limits>
+                    </rule>
+                    <rule>
+                      <element>BUNDLE</element>
+                      <excludes>
+                        <exclude>com/github/enr/returns/testsupport/*</exclude>
+                      </excludes>
+                      <limits>
+                        <limit>
+                          <counter>INSTRUCTION</counter>
+                          <value>COVEREDRATIO</value>
+                          <minimum>0.75</minimum>
+                        </limit>
+                        <limit>
+                          <counter>CLASS</counter>
+                          <value>MISSEDCOUNT</value>
+                          <maximum>0</maximum>
                         </limit>
                       </limits>
                     </rule>
@@ -119,6 +137,44 @@
                 </configuration>
               </execution>
             </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <executions>
+              <execution>
+                <id>mutation-coverage</id>
+                <goals>
+                  <goal>mutationCoverage</goal>
+                </goals>
+                <phase>verify</phase>
+              </execution>
+            </executions>
+            <dependencies>
+              <dependency>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-junit5-plugin</artifactId>
+                <version>1.2.1</version>
+              </dependency>
+            </dependencies>
+            <configuration>
+              <targetClasses>
+                <param>com.github.enr.returns*</param>
+              </targetClasses>
+              <targetTests>
+                <param>com.github.enr.returns*</param>
+              </targetTests>
+              <mutators>
+                <mutator>DEFAULTS</mutator>
+              </mutators>
+              <avoidCallsTo>
+                <avoidCallsTo>java.lang.System.Logger</avoidCallsTo>
+                <avoidCallsTo>java.util.logging</avoidCallsTo>
+                <avoidCallsTo>org.apache.log4j</avoidCallsTo>
+                <avoidCallsTo>org.slf4j</avoidCallsTo>
+                <avoidCallsTo>org.apache.commons.logging</avoidCallsTo>
+              </avoidCallsTo>
+            </configuration>
           </plugin>
           <plugin>
             <groupId>net.revelc.code.formatter</groupId>
@@ -310,6 +366,11 @@
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>versions-maven-plugin</artifactId>
           <version>2.16.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.pitest</groupId>
+          <artifactId>pitest-maven</artifactId>
+          <version>1.15.7</version>
         </plugin>
         <plugin>
           <groupId>org.jacoco</groupId>

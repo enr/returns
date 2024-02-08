@@ -14,4 +14,10 @@ class SuccessTest {
     ResultAssertions.verifySuccess(result, value);
   }
 
+  @Test
+  void testEmpty() {
+    Result<Nothing> result = Result.success();
+    ResultAssertions.verifySuccess(result, Nothing.INSTANCE);
+  }
+
 }

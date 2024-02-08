@@ -76,8 +76,8 @@ public sealed interface Result<T> permits Success, Failure, Skip, CompositeResul
 
   default void ifSuccess(Consumer<T> consumer) {}
 
-  public static Result<Empty> success() {
-    return new Success<>(Empty.INSTANCE);
+  public static Result<Nothing> success() {
+    return new Success<>(Nothing.INSTANCE);
   }
 
   public static <T> Result<T> success(T value) {
@@ -100,6 +100,6 @@ public sealed interface Result<T> permits Success, Failure, Skip, CompositeResul
   public static <T> Result<T> failingWithCause(Throwable cause) {
     Throwable c = Objects.requireNonNull(cause, "cause must not be null");
     String errorMessage = c.getMessage() == null ? "generic error" : c.getMessage();
-    return new Failure<>(errorMessage, null);
+    return new Failure<>(errorMessage, cause);
   }
 }

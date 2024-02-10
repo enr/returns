@@ -1,6 +1,8 @@
-package com.github.enr.returns.result;
+package com.github.enr.returns.result.multi;
 
 import java.util.Collection;
+
+import com.github.enr.returns.result.Result;
 
 @FunctionalInterface
 public interface CompositeResultSuccessPolicy<T> {

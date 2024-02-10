@@ -1,4 +1,6 @@
-package com.github.enr.returns.result;
+package com.github.enr.returns.result.uni;
+
+import com.github.enr.returns.result.Result;
 
 public final class Skip<T> implements Result<T> {
 

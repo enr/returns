@@ -6,10 +6,10 @@ import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Assertions;
 
-import com.github.enr.returns.result.Failure;
 import com.github.enr.returns.result.Result;
-import com.github.enr.returns.result.Skip;
-import com.github.enr.returns.result.Success;
+import com.github.enr.returns.result.uni.Failure;
+import com.github.enr.returns.result.uni.Skip;
+import com.github.enr.returns.result.uni.Success;
 
 public class ResultAssertions {
 
@@ -20,6 +20,7 @@ public class ResultAssertions {
   public static <T> void verifySuccess(Result<T> result, T value) {
     assertThat(result).as("result").isInstanceOf(Success.class);
     assertThat(result.isSuccessful()).as("is successful").isTrue();
+    assertThat(result.isUnsuccessful()).as("is unsuccessful").isFalse();
     assertThat(result.isSkipped()).as("is skipped").isFalse();
     assertThat(result.isFailed()).as("is failed").isFalse();
     assertThat(result.isComposite()).as("is composite").isFalse();
@@ -44,6 +45,7 @@ public class ResultAssertions {
   public static <T> void verifyFailure(Result<T> result, T fallback) {
     assertThat(result).as("result").isInstanceOf(Failure.class);
     assertThat(result.isSuccessful()).as("is successful").isFalse();
+    assertThat(result.isUnsuccessful()).as("is unsuccessful").isTrue();
     assertThat(result.isSkipped()).as("is skipped").isFalse();
     assertThat(result.isFailed()).as("is failed").isTrue();
     assertThat(result.isComposite()).as("is composite").isFalse();
@@ -55,6 +57,7 @@ public class ResultAssertions {
   public static <T> void verifySkip(Result<T> result, String reason, T fallback) {
     assertThat(result).as("result").isInstanceOf(Skip.class);
     assertThat(result.isSuccessful()).as("is successful").isFalse();
+    assertThat(result.isUnsuccessful()).as("is unsuccessful").isTrue();
     assertThat(result.isSkipped()).as("is skipped").isTrue();
     assertThat(result.isFailed()).as("is failed").isFalse();
     assertThat(result.isComposite()).as("is composite").isFalse();

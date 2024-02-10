@@ -6,6 +6,11 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import com.github.enr.returns.result.multi.CompositeResult;
+import com.github.enr.returns.result.uni.Failure;
+import com.github.enr.returns.result.uni.Skip;
+import com.github.enr.returns.result.uni.Success;
+
 public sealed interface Result<T> permits Success, Failure, Skip, CompositeResult {
 
   default T unwrap() {
@@ -14,6 +19,10 @@ public sealed interface Result<T> permits Success, Failure, Skip, CompositeResul
 
   default boolean isSuccessful() {
     return false;
+  }
+
+  default boolean isUnsuccessful() {
+    return !isSuccessful();
   }
 
   default boolean isFailed() {
@@ -88,18 +97,37 @@ public sealed interface Result<T> permits Success, Failure, Skip, CompositeResul
     return new Skip<>(reason);
   }
 
-  public static <T> Result<T> failingWithMessage(String errorMessage) {
-    return new Failure<>(errorMessage, null);
-  }
-
-  public static <T> Result<T> failingWithMessage(String fmt, Object... args) {
-    String errorMessage = String.format(fmt, args);
-    return new Failure<>(errorMessage, null);
-  }
-
-  public static <T> Result<T> failingWithCause(Throwable cause) {
-    Throwable c = Objects.requireNonNull(cause, "cause must not be null");
-    String errorMessage = c.getMessage() == null ? "generic error" : c.getMessage();
+  public static <T> Result<T> failure(Throwable cause, String errorMessage) {
     return new Failure<>(errorMessage, cause);
+  }
+
+  public static <T> Result<T> failure(String errorMessage) {
+    return failure(null, errorMessage);
+  }
+
+  public static <T> Result<T> failure(String fmt, Object... args) {
+    return failure(null, fmt, args);
+  }
+
+  public static <T> Result<T> failure(Throwable cause, String fmt, Object... args) {
+    String errorMessage = String.format(fmt, args);
+    return failure(cause, errorMessage);
+  }
+
+  public static <T> Result<T> failure(Throwable cause) {
+    String errorMessage = cause == null || cause.getMessage() == null ? "generic error" : cause.getMessage();
+    return failure(cause, errorMessage);
+  }
+
+  public static <T> Result<T> copyUnsuccesful(Result<?> source) {
+    Result<?> src = Objects.requireNonNull(source, "source must not be null");
+    if (src instanceof Failure f) {
+      Optional<Throwable> cause = src.cause();
+      return Result.failure(cause.orElse(null), f.explanation());
+    }
+    if (src instanceof Skip s) {
+      return Result.skip(s.explanation());
+    }
+    throw new IllegalArgumentException("Not an unsuccesful result " + source);
   }
 }

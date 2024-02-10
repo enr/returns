@@ -11,7 +11,7 @@ class FailureTest {
   void testErrorMessage() {
     String fallback = "fallback-" + RandomStrings.withLength(10);
     String errorMessage = "error-" + RandomStrings.withLength(10);
-    Result<String> result = Result.failingWithMessage(errorMessage);
+    Result<String> result = Result.failure(errorMessage);
     ResultAssertions.verifyFailure(result, errorMessage, fallback);
   }
 
@@ -21,7 +21,7 @@ class FailureTest {
     String errorMessageTemplate = "error-%s";
     String errorMessageArg = "test";
     String expectedErrorMessage = "error-test";
-    Result<String> result = Result.failingWithMessage(errorMessageTemplate, errorMessageArg);
+    Result<String> result = Result.failure(errorMessageTemplate, errorMessageArg);
     ResultAssertions.verifyFailure(result, expectedErrorMessage, fallback);
   }
 
@@ -30,7 +30,7 @@ class FailureTest {
     String fallback = "fallback-" + RandomStrings.withLength(10);
     String errorMessage = "error-" + RandomStrings.withLength(10);
     Exception cause = new Exception(errorMessage);
-    Result<String> result = Result.failingWithCause(cause);
+    Result<String> result = Result.failure(cause);
     ResultAssertions.verifyFailure(result, cause, fallback);
   }
 }

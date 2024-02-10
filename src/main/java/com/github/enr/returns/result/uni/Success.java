@@ -1,9 +1,11 @@
-package com.github.enr.returns.result;
+package com.github.enr.returns.result.uni;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+
+import com.github.enr.returns.result.Result;
 
 public final class Success<T> implements Result<T> {
 

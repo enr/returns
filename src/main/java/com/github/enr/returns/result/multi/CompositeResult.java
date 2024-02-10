@@ -1,8 +1,10 @@
-package com.github.enr.returns.result;
+package com.github.enr.returns.result.multi;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import com.github.enr.returns.result.Result;
 
 public final class CompositeResult<T> implements Result<Collection<T>> {
 

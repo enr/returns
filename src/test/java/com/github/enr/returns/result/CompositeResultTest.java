@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.enr.returns.result.multi.CompositeResult;
+import com.github.enr.returns.result.multi.CompositeResultPolicies;
 import com.github.enr.returns.testsupport.RandomStrings;
 
 class CompositeResultTest {
@@ -15,7 +17,7 @@ class CompositeResultTest {
     String payload = "payload-" + RandomStrings.withLength(6);
     CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
     sut.add(Result.success(payload));
-    sut.add(Result.failingWithMessage("oh no"));
+    sut.add(Result.failure("oh no"));
     assertThat(sut).as("result").isInstanceOf(CompositeResult.class);
     assertThat(sut.isPartial()).as("is partial").isTrue();
     assertThat(sut.isSuccessful()).as("is successful").isFalse();
@@ -32,7 +34,7 @@ class CompositeResultTest {
     String fallback = "fallback-" + RandomStrings.withLength(6);
     CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
     sut.add(Result.success(payload));
-    sut.add(Result.failingWithMessage("oh no"));
+    sut.add(Result.failure("oh no"));
     assertThat(sut.isPartial()).as("is partial").isTrue();
     assertThat(sut.explanation()).as("error").contains("errors");
     assertThat(sut.unwrap()).as("success result").hasSize(1).contains(payload);
@@ -45,7 +47,7 @@ class CompositeResultTest {
     String err2 = "error-" + RandomStrings.withLength(6);
     String fallback = "fallback-" + RandomStrings.withLength(6);
     CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
-    sut.addAll(List.of(Result.failingWithMessage(err1), Result.failingWithMessage(err2)));
+    sut.addAll(List.of(Result.failure(err1), Result.failure(err2)));
     assertThat(sut.explanation()).as("error message").contains(err1).contains(err2);
     assertThat(sut.orElse(List.of(fallback))).as("fallback").containsExactly(fallback);
   }

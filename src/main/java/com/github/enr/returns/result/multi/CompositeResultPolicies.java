@@ -1,4 +1,4 @@
-package com.github.enr.returns.result;
+package com.github.enr.returns.result.multi;
 
 public record CompositeResultPolicies<T>(CompositeResultSuccessPolicy<T> success, CompositeResultSkipPolicy<T> skip,
     CompositeResultFailurePolicy<T> failure) {

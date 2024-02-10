@@ -2,8 +2,8 @@ package com.github.enr.returns.testsupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.github.enr.returns.result.CompositeResult;
 import com.github.enr.returns.result.Result;
+import com.github.enr.returns.result.multi.CompositeResult;
 
 public class CompositeResultAssertions {
 

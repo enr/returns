@@ -330,7 +330,7 @@
         <plugin>
           <groupId>io.github.git-commit-id</groupId>
           <artifactId>git-commit-id-maven-plugin</artifactId>
-          <version>7.0.0</version>
+          <version>9.0.1</version>
         </plugin>
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
@@ -432,16 +432,4 @@
     </pluginManagement>
   </build>
 
-  <repositories>
-    <repository>
-      <id>jitpack.io</id>
-      <url>https://jitpack.io</url>
-    </repository>
-  </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>jitpack.io</id>
-      <url>https://jitpack.io</url>
-    </pluginRepository>
-  </pluginRepositories>
 </project>

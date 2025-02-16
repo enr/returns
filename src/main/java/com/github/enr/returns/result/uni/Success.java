@@ -1,11 +1,11 @@
 package com.github.enr.returns.result.uni;
 
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.github.enr.returns.result.Result;
+import com.github.enr.testexclusions.Generated;
 
 public final class Success<T> implements Result<T> {
 
@@ -21,17 +21,11 @@ public final class Success<T> implements Result<T> {
   }
 
   /**
-   * If a value is present, returns the value, otherwise throws {@code NoSuchElementException}.
    *
    * @return the non-null value held by this {@code Result}
-   * @throws NoSuchElementException if there is no value present
-   * @see Optional#isPresent()
    */
   @Override
   public T unwrap() {
-    // if (value == null) {
-    // throw new NoSuchElementException("No value present");
-    // }
     return value;
   }
 
@@ -44,4 +38,15 @@ public final class Success<T> implements Result<T> {
   public Optional<T> toOptional() {
     return Optional.ofNullable(value);
   }
+
+  @Generated
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("Success [");
+    builder.append(value);
+    builder.append("]");
+    return builder.toString();
+  }
+
 }

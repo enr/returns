@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import com.github.enr.returns.result.Result;
+import com.github.enr.testexclusions.Generated;
 
 public final class Failure<T> implements Result<T> {
 
@@ -29,4 +30,17 @@ public final class Failure<T> implements Result<T> {
   public String explanation() {
     return message;
   }
+
+  @Generated
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("Failure [message=");
+    builder.append(message);
+    builder.append(", cause=");
+    builder.append(cause);
+    builder.append("]");
+    return builder.toString();
+  }
+
 }

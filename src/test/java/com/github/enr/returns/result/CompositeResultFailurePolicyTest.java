@@ -15,17 +15,79 @@ class CompositeResultFailurePolicyTest {
     List<Result<String>> results = List.of();
     CompositeResultFailurePolicy<String> sut = CompositeResultFailurePolicy.all();
     boolean result = sut.apply(results);
-    assertThat(result).as("result").isFalse();
+    assertThat(result).as("all policy with no results should be false").isFalse();
   }
 
   @Test
-  void testAtLeastOne() {
-    List<Result<String>> empty = List.of();
-    List<Result<String>> oneFailure = List.of(Result.failure("err 1"), Result.failure("err 2"), Result.skip("skip"));
-    List<Result<String>> noError = List.of(Result.success("ok"), Result.skip("skip"));
-    CompositeResultFailurePolicy<String> sut = CompositeResultFailurePolicy.atLeastOne();
-    assertThat(sut.apply(empty)).as("apply on empty").isFalse();
-    assertThat(sut.apply(noError)).as("apply on no error").isFalse();
-    assertThat(sut.apply(oneFailure)).as("apply on error").isTrue();
+  void testPolicyAllWhenAllSuccess() {
+    List<Result<String>> results = List.of(Result.success("ok1"), Result.success("ok2"));
+    CompositeResultFailurePolicy<String> sut = CompositeResultFailurePolicy.all();
+    boolean result = sut.apply(results);
+    assertThat(result).as("all policy with all successes should be false").isFalse();
   }
+
+  @Test
+  void testPolicyAllWhenAllFailures() {
+    List<Result<String>> results = List.of(Result.failure("err1"), Result.failure("err2"));
+    CompositeResultFailurePolicy<String> sut = CompositeResultFailurePolicy.all();
+    boolean result = sut.apply(results);
+    assertThat(result).as("all policy with all failures should be true").isTrue();
+  }
+
+  @Test
+  void testPolicyAllWhenMixedResults() {
+    List<Result<String>> results = List.of(Result.success("ok"), Result.failure("err"), Result.skip("skip"));
+    CompositeResultFailurePolicy<String> sut = CompositeResultFailurePolicy.all();
+    boolean result = sut.apply(results);
+    assertThat(result).as("all policy with mixed results should be false").isFalse();
+  }
+
+  @Test
+  void testPolicyAllWhenOnlySkips() {
+    List<Result<String>> results = List.of(Result.skip("skip1"), Result.skip("skip2"));
+    CompositeResultFailurePolicy<String> sut = CompositeResultFailurePolicy.all();
+    boolean result = sut.apply(results);
+    assertThat(result).as("all policy with only skips should be false").isFalse();
+  }
+
+  @Test
+  void testAtLeastOneWhenNoResult() {
+    List<Result<String>> results = List.of();
+    CompositeResultFailurePolicy<String> sut = CompositeResultFailurePolicy.atLeastOne();
+    boolean result = sut.apply(results);
+    assertThat(result).as("at least one policy with no results should be false").isFalse();
+  }
+
+  @Test
+  void testAtLeastOneWhenAllSuccess() {
+    List<Result<String>> results = List.of(Result.success("ok1"), Result.success("ok2"));
+    CompositeResultFailurePolicy<String> sut = CompositeResultFailurePolicy.atLeastOne();
+    boolean result = sut.apply(results);
+    assertThat(result).as("at least one policy with all successes should be false").isFalse();
+  }
+
+  @Test
+  void testAtLeastOneWhenAllFailures() {
+    List<Result<String>> results = List.of(Result.failure("err1"), Result.failure("err2"));
+    CompositeResultFailurePolicy<String> sut = CompositeResultFailurePolicy.atLeastOne();
+    boolean result = sut.apply(results);
+    assertThat(result).as("at least one policy with all failures should be true").isTrue();
+  }
+
+  @Test
+  void testAtLeastOneWhenMixedResults() {
+    List<Result<String>> results = List.of(Result.success("ok"), Result.failure("err"), Result.skip("skip"));
+    CompositeResultFailurePolicy<String> sut = CompositeResultFailurePolicy.atLeastOne();
+    boolean result = sut.apply(results);
+    assertThat(result).as("at least one policy with mixed results should be true").isTrue();
+  }
+
+  @Test
+  void testAtLeastOneWhenOnlySkips() {
+    List<Result<String>> results = List.of(Result.skip("skip1"), Result.skip("skip2"));
+    CompositeResultFailurePolicy<String> sut = CompositeResultFailurePolicy.atLeastOne();
+    boolean result = sut.apply(results);
+    assertThat(result).as("at least one policy with only skips should be false").isFalse();
+  }
+
 }

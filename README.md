@@ -7,7 +7,8 @@
 
 ## Overview
 
-`returns` is a Java library that provides result types to indicate whether an operation was successful, failed, or skipped. 
+`returns` is a Java library that provides result types to indicate whether an operation was successful, failed, or skipped.
+
 This allows for clear and structured error handling without relying on exceptions for control flow.
 
 ## Usage
@@ -19,8 +20,8 @@ Add the JitPack repository to your build file
 ```xml
 <repositories>
   <repository>
-      <id>jitpack.io</id>
-      <url>https://jitpack.io</url>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
   </repository>
 </repositories>
 ```
@@ -29,9 +30,9 @@ Add the dependency
 
 ```xml
 <dependency>
-    <groupId>com.github.enr</groupId>
-    <artifactId>returns</artifactId>
-    <version>${returns.version}</version>
+  <groupId>com.github.enr</groupId>
+  <artifactId>returns</artifactId>
+  <version>${returns.version}</version>
 </dependency>
 ```
 
@@ -62,24 +63,24 @@ if (result.isSuccessful()) {
 
 Build:
 
-```
+```sh
 mvn install
 ```
 
 Full check (test and formatting):
 
-```
+```sh
 mvn -Pci
 ```
 
 Repair formatting:
 
-```
+```sh
 mvn -Pfmt
 ```
 
 Fast build (skip any check and file generation):
 
-```
+```sh
 mvn -Pfast
 ```

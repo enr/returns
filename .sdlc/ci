@@ -14,4 +14,10 @@ hash mvn 2>/dev/null || {
   exit 1
 }
 
-mvn --no-transfer-progress --batch-mode --update-snapshots verify -Pci
+# ${session.rootDirectory} is mvn placeholder, not a script variable
+# https://maven.apache.org/resolver/remote-repository-filtering.html
+mvn -s .mvn/settings.xml --update-snapshots \
+   '-Daether.remoteRepositoryFilter.groupId.basedir=${session.rootDirectory}/.mvn/rrf/' \
+    -Daether.remoteRepositoryFilter.groupId=true \
+     verify -Pci
+

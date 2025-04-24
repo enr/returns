@@ -85,6 +85,25 @@ public sealed interface Result<T> permits Success, Failure, Skip, CompositeResul
 
   default void ifSuccess(Consumer<T> consumer) {}
 
+  default boolean is(Class<? extends ErrorKind> errorKind) {
+    return false;
+  }
+
+  /*
+   * shortcut for isFailed() && is(errorKind)
+   */
+  default boolean isFailureOfKind(Class<? extends ErrorKind> errorKind) {
+    return false;
+  }
+
+  default <K extends ErrorKind> K kind() {
+    throw new IllegalStateException("Type " + getClass() + " does not have an error kind");
+  }
+
+  default boolean isUnclassified() {
+    return false;
+  }
+
   public static Result<Nothing> success() {
     return new Success<>(Nothing.INSTANCE);
   }
@@ -97,12 +116,20 @@ public sealed interface Result<T> permits Success, Failure, Skip, CompositeResul
     return new Skip<>(reason);
   }
 
+  public static <T> Result<T> failure(ErrorKind kind, Throwable cause, String errorMessage) {
+    return new Failure<>(kind, cause, errorMessage);
+  }
+
   public static <T> Result<T> failure(Throwable cause, String errorMessage) {
-    return new Failure<>(errorMessage, cause);
+    return failure(ErrorKind.unclassified(), cause, errorMessage);
+  }
+
+  public static <T> Result<T> failure(ErrorKind kind, String errorMessage) {
+    return failure(kind, null, errorMessage);
   }
 
   public static <T> Result<T> failure(String errorMessage) {
-    return failure(null, errorMessage);
+    return failure(ErrorKind.unclassified(), null, errorMessage);
   }
 
   public static <T> Result<T> failure(String fmt, Object... args) {

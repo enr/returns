@@ -43,6 +43,12 @@ class ResultTest {
   }
 
   @Test
+  void testCopyUnsuccessfulOnSuccess() {
+    Result<Nothing> source = Result.success();
+    Assertions.assertThrows(IllegalArgumentException.class, () -> Result.copyUnsuccesful(source));
+  }
+
+  @Test
   void errorResult() {
     String fallback = "fallback-" + RandomStrings.withLength(6);
     String errorMessage = "error-" + RandomStrings.withLength(6);
@@ -100,6 +106,14 @@ class ResultTest {
     assertThat(exception).as("exception").hasMessage(orFailMessage);
     String orElse = failure.orElse(fallback);
     assertThat(orElse).as("orElse").isEqualTo(fallback);
+  }
+
+  @Test
+  void successKind() {
+    Result<String> result = Result.success("test");
+    assertThat(result.is(UnclassifiedError.class)).as("is generic error kind").isFalse();
+    assertThat(result.isFailureOfKind(UnclassifiedError.class)).as("is generic error kind").isFalse();
+    Assertions.assertThrows(IllegalStateException.class, () -> result.kind());
   }
 
 }

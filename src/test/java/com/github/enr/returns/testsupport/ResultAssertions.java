@@ -30,13 +30,13 @@ public class ResultAssertions {
     assertThat(result.cause()).as("cause").isEmpty();
   }
 
-  public static <T> void verifyFailure(Result<T> result, String errorMessage, T fallback) {
+  public static <T> void verifyFailureFromMessage(Result<T> result, String errorMessage, T fallback) {
     verifyFailure(result, fallback);
     assertThat(result.explanation()).as("explanation").isEqualTo(errorMessage);
     assertThat(result.cause()).as("cause").isEmpty();
   }
 
-  public static <T> void verifyFailure(Result<T> result, Throwable cause, T fallback) {
+  public static <T> void verifyFailureFromThrowable(Result<T> result, Throwable cause, T fallback) {
     verifyFailure(result, fallback);
     assertThat(result.explanation()).as("explanation").isEqualTo(cause.getMessage());
     assertThat(result.cause()).as("cause").contains(cause);

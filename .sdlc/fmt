@@ -14,4 +14,4 @@ cd "${prj_home}"
   exit 1
 }
 
-./mvnw --no-transfer-progress --batch-mode --update-snapshots verify -Pci
+./mvnw -Pfmt

@@ -9,18 +9,18 @@ prj_home="$( cd -P "$( dirname "$sdlc_dir" )" && pwd )"
 
 cd "${prj_home}"
 
-hash mvn 2>/dev/null || {
-  echo 'No Maven executable: aborting'
+[[ -x ./mvnw ]] || {
+  echo 'No Maven wrapper executable: aborting'
   exit 1
 }
 
 echo '---'
 echo '--- Plugins updates'
-mvn -Dmaven.version.ignore='(?i).*-(alpha|beta|m|rc)([-.]?\d+)?' \
+./mvnw -Dmaven.version.ignore='(?i).*-(alpha|beta|m|rc)([-.]?\d+)?' \
     org.codehaus.mojo:versions-maven-plugin:2.18.0:display-plugin-updates \
     | grep --color=never '\[INFO\]   ' | sort | uniq
 echo '--- Dependencies updates'
-mvn -Dmaven.version.ignore='(?i).*-(alpha|beta|m|rc)([-.]?\d+)?' \
+./mvnw -Dmaven.version.ignore='(?i).*-(alpha|beta|m|rc)([-.]?\d+)?' \
     org.codehaus.mojo:versions-maven-plugin:2.18.0:display-dependency-updates \
     | grep --color=never '\[INFO\]   ' | sort | uniq
 echo '---'

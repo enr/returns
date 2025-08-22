@@ -18,7 +18,7 @@ cd "${prj_home}"
 # allows filtering of Artifact by RemoteRepository based on various criteria
 # ${session.rootDirectory} is mvn placeholder, not a script variable
 # https://maven.apache.org/resolver/remote-repository-filtering.html
-./mvnw -s .mvn/settings.xml --update-snapshots \
+./mvnw -s .mvn/settings.xml --update-snapshots --no-transfer-progress --batch-mode \
    '-Daether.remoteRepositoryFilter.groupId.basedir=${session.rootDirectory}/.mvn/rrf/' \
     -Daether.remoteRepositoryFilter.groupId=true \
      verify -Pci

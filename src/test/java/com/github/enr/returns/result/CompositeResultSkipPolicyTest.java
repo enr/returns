@@ -13,9 +13,19 @@ class CompositeResultSkipPolicyTest {
   @Test
   void testPolicyAllWhenNoResult() {
     List<Result<String>> results = List.of();
-    CompositeResultSkipPolicy<String> sut = CompositeResultSkipPolicy.all();
-    boolean result = sut.apply(results);
-    assertThat(result).as("result").isFalse();
+    assertThat(CompositeResultSkipPolicy.<String>all().apply(results)).as("empty").isFalse();
+  }
+
+  @Test
+  void testPolicyAllWhenAllSkips() {
+    List<Result<String>> results = List.of(Result.skip("s1"), Result.skip("s2"));
+    assertThat(CompositeResultSkipPolicy.<String>all().apply(results)).as("all skips").isTrue();
+  }
+
+  @Test
+  void testPolicyAllWhenMixed() {
+    List<Result<String>> results = List.of(Result.skip("s1"), Result.success("ok"));
+    assertThat(CompositeResultSkipPolicy.<String>all().apply(results)).as("mixed").isFalse();
   }
 
   @Test

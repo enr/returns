@@ -47,6 +47,8 @@ class FailureTest {
   }
   private static class BarError implements ErrorKind {
   }
+  private static class ChildFooError extends FooError {
+  }
 
   @Test
   void testKindOnResult() {
@@ -67,12 +69,21 @@ class FailureTest {
   }
 
   @Test
+  void testKindInheritance() {
+    String errorMessage = "error-" + RandomStrings.withLength(10);
+    Result<String> result = Result.failure(new ChildFooError(), errorMessage);
+    assertThat(result.is(ChildFooError.class)).as("exact match").isTrue();
+    assertThat(result.is(FooError.class)).as("parent kind match").isTrue();
+    assertThat(result.is(BarError.class)).as("unrelated kind").isFalse();
+    assertThat(result.isFailureOfKind(FooError.class)).as("isFailureOfKind parent").isTrue();
+  }
+
+  @Test
   void testErrorMessageWithKind() {
     String fallback = "fallback-" + RandomStrings.withLength(10);
     String errorMessage = "error-" + RandomStrings.withLength(10);
     Result<String> result = Result.failure(new FooError(), errorMessage);
-    System.err.println("result: " + result.getClass());
-    ResultAssertions.verifyFailureFromMessage(result, errorMessage, fallback);
+ResultAssertions.verifyFailureFromMessage(result, errorMessage, fallback);
 
     assertThat(result.isFailureOfKind(FooError.class)).as("Response class is failure of kind foo").isTrue();
     assertThat(result.is(FooError.class)).as("Response class is foo").isTrue();

@@ -63,4 +63,36 @@ class CompositeResultTest {
     assertThat(sut.orElse(List.of(fallback))).as("fallback").containsExactly(fallback);
   }
 
+  @Test
+  void resultsReturnsImmutableSnapshot() {
+    CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
+    sut.add(Result.success("a"));
+    sut.add(Result.failure("err"));
+    assertThat(sut.results()).hasSize(2);
+  }
+
+  @Test
+  void atLeastOnePolicyBehavior() {
+    CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.atLeastOne());
+    sut.add(Result.success("ok"));
+    sut.add(Result.failure("err"));
+    assertThat(sut.isSuccessful()).as("atLeastOne: one success → successful").isTrue();
+    assertThat(sut.isFailed()).as("atLeastOne: one failure → failed").isTrue();
+    assertThat(sut.isSkipped()).as("atLeastOne: no skip → not skipped").isFalse();
+  }
+
+  @Test
+  void allFailureIsNotPartial() {
+    CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
+    sut.addAll(List.of(Result.failure("err1"), Result.failure("err2")));
+    assertThat(sut.isPartial()).as("all-failure is not partial").isFalse();
+  }
+
+  @Test
+  void unwrapWithNoSuccessesReturnsEmptyCollection() {
+    CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
+    sut.addAll(List.of(Result.failure("err1"), Result.failure("err2")));
+    assertThat(sut.unwrap()).as("unwrap with no successes").isEmpty();
+  }
+
 }

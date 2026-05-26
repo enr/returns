@@ -12,7 +12,7 @@ public class RandomStrings {
 
   public static String withLength(int length) {
     if (length < 0) {
-      throw new IllegalArgumentException("Lenght must be greater than 0");
+      throw new IllegalArgumentException("Length must be greater than 0");
     }
     if (length == 0) {
       return "";

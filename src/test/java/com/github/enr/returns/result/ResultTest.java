@@ -49,6 +49,28 @@ class ResultTest {
   }
 
   @Test
+  void testCopyUnsuccessfulOnNull() {
+    Assertions.assertThrows(NullPointerException.class, () -> Result.copyUnsuccesful(null));
+  }
+
+  @Test
+  void failureFromNullThrowable() {
+    Result<String> result = Result.failure((Throwable) null);
+    assertThat(result.isFailed()).isTrue();
+    assertThat(result.explanation()).as("null cause falls back to generic error").isEqualTo("generic error");
+    assertThat(result.cause()).isEmpty();
+  }
+
+  @Test
+  void failureFromThrowableWithNullMessage() {
+    Throwable cause = new RuntimeException((String) null);
+    Result<String> result = Result.failure(cause);
+    assertThat(result.isFailed()).isTrue();
+    assertThat(result.explanation()).as("null message falls back to generic error").isEqualTo("generic error");
+    assertThat(result.cause()).contains(cause);
+  }
+
+  @Test
   void errorResult() {
     String fallback = "fallback-" + RandomStrings.withLength(6);
     String errorMessage = "error-" + RandomStrings.withLength(6);

@@ -14,8 +14,35 @@ class CompositeResultSuccessPolicyTest {
   void testPolicyAllWhenNoResult() {
     List<Result<String>> results = List.of();
     CompositeResultSuccessPolicy<String> sut = CompositeResultSuccessPolicy.all();
-    boolean result = sut.apply(results);
-    assertThat(result).as("result").isFalse();
+    assertThat(sut.apply(results)).as("empty").isFalse();
+  }
+
+  @Test
+  void testPolicyAllWhenAllSuccess() {
+    List<Result<String>> results = List.of(Result.success("ok1"), Result.success("ok2"));
+    assertThat(CompositeResultSuccessPolicy.<String>all().apply(results)).as("all success").isTrue();
+  }
+
+  @Test
+  void testPolicyAllWhenMixedResults() {
+    List<Result<String>> results = List.of(Result.success("ok"), Result.failure("err"));
+    assertThat(CompositeResultSuccessPolicy.<String>all().apply(results)).as("mixed").isFalse();
+  }
+
+  @Test
+  void testPolicyAllWhenAllFailure() {
+    List<Result<String>> results = List.of(Result.failure("err1"), Result.failure("err2"));
+    assertThat(CompositeResultSuccessPolicy.<String>all().apply(results)).as("all failure").isFalse();
+  }
+
+  @Test
+  void testNoError() {
+    CompositeResultSuccessPolicy<String> sut = CompositeResultSuccessPolicy.noError();
+    assertThat(sut.apply(List.of())).as("empty — vacuously no errors").isTrue();
+    assertThat(sut.apply(List.of(Result.success("ok")))).as("all success").isTrue();
+    assertThat(sut.apply(List.of(Result.skip("skip")))).as("only skips").isTrue();
+    assertThat(sut.apply(List.of(Result.failure("err")))).as("one failure").isFalse();
+    assertThat(sut.apply(List.of(Result.success("ok"), Result.failure("err")))).as("mixed").isFalse();
   }
 
   @Test

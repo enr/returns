@@ -63,4 +63,18 @@ class CompositeResultTest {
     assertThat(sut.orElse(List.of(fallback))).as("fallback").containsExactly(fallback);
   }
 
+  @Test
+  void allFailureIsNotPartial() {
+    CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
+    sut.addAll(List.of(Result.failure("err1"), Result.failure("err2")));
+    assertThat(sut.isPartial()).as("all-failure is not partial").isFalse();
+  }
+
+  @Test
+  void unwrapWithNoSuccessesReturnsEmptyCollection() {
+    CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
+    sut.addAll(List.of(Result.failure("err1"), Result.failure("err2")));
+    assertThat(sut.unwrap()).as("unwrap with no successes").isEmpty();
+  }
+
 }

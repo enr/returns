@@ -38,7 +38,7 @@ public final class Failure<T> implements Result<T> {
   @Override
   public boolean is(Class<? extends ErrorKind> errorKind) {
     // kind is always not null
-    return kind.getClass().isAssignableFrom(errorKind);
+    return errorKind.isAssignableFrom(kind.getClass());
   }
 
   @Override

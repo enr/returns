@@ -49,6 +49,11 @@ class ResultTest {
   }
 
   @Test
+  void testCopyUnsuccessfulOnNull() {
+    Assertions.assertThrows(NullPointerException.class, () -> Result.copyUnsuccesful(null));
+  }
+
+  @Test
   void errorResult() {
     String fallback = "fallback-" + RandomStrings.withLength(6);
     String errorMessage = "error-" + RandomStrings.withLength(6);

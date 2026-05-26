@@ -14,4 +14,4 @@ cd "${prj_home}"
   exit 1
 }
 
-./mvnw -Pfmt
+./mvnw -s .mvn/settings.xml -Pfmt

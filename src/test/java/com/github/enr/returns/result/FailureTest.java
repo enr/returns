@@ -83,7 +83,7 @@ class FailureTest {
     String fallback = "fallback-" + RandomStrings.withLength(10);
     String errorMessage = "error-" + RandomStrings.withLength(10);
     Result<String> result = Result.failure(new FooError(), errorMessage);
-ResultAssertions.verifyFailureFromMessage(result, errorMessage, fallback);
+    ResultAssertions.verifyFailureFromMessage(result, errorMessage, fallback);
 
     assertThat(result.isFailureOfKind(FooError.class)).as("Response class is failure of kind foo").isTrue();
     assertThat(result.is(FooError.class)).as("Response class is foo").isTrue();

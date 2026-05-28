@@ -7,6 +7,8 @@ import java.util.function.Predicate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.github.enr.returns.result.multi.CompositeResult;
+import com.github.enr.returns.result.multi.CompositeResultPolicies;
 import com.github.enr.returns.result.uni.Failure;
 import com.github.enr.returns.testsupport.RandomStrings;
 
@@ -136,6 +138,19 @@ class ResultTest {
     assertThat(result.is(UnclassifiedError.class)).as("is generic error kind").isFalse();
     assertThat(result.isFailureOfKind(UnclassifiedError.class)).as("is generic error kind").isFalse();
     Assertions.assertThrows(IllegalStateException.class, () -> result.kind());
+  }
+
+  @Test
+  void copyUnsuccesfulOnCompositeThrowsIllegalArgument() {
+    CompositeResult<String> composite = CompositeResult.empty(CompositeResultPolicies.all());
+    composite.add(Result.failure("err"));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> Result.copyUnsuccesful(composite));
+  }
+
+  @Test
+  void isErrorAndWithNullPredicateThrowsNpeOnFailure() {
+    Result<String> failure = Result.failure(new Exception(), "err");
+    Assertions.assertThrows(NullPointerException.class, () -> failure.isErrorAnd(null));
   }
 
 }

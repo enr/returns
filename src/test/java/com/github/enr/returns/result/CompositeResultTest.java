@@ -1,13 +1,16 @@
 package com.github.enr.returns.result;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import com.github.enr.returns.result.multi.CompositeResult;
 import com.github.enr.returns.result.multi.CompositeResultPolicies;
+import com.github.enr.returns.testsupport.CompositeResultAssertions;
 import com.github.enr.returns.testsupport.RandomStrings;
 
 class CompositeResultTest {
@@ -93,6 +96,68 @@ class CompositeResultTest {
     CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
     sut.addAll(List.of(Result.failure("err1"), Result.failure("err2")));
     assertThat(sut.unwrap()).as("unwrap with no successes").isEmpty();
+  }
+
+  @Test
+  void resultsSnapshotIsUnmodifiable() {
+    CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
+    sut.add(Result.success("a"));
+    Collection<Result<String>> snapshot = sut.results();
+    assertThatThrownBy(() -> snapshot.add(Result.success("b")))
+        .isInstanceOf(UnsupportedOperationException.class);
+  }
+
+  @Test
+  void resultsSnapshotDoesNotReflectLaterAdditions() {
+    CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
+    sut.add(Result.success("a"));
+    Collection<Result<String>> snapshot = sut.results();
+    sut.add(Result.failure("err"));
+    assertThat(snapshot).as("snapshot taken before second add").hasSize(1);
+  }
+
+  @Test
+  void emptyCompositeIsNeitherSuccessNorFailedNorSkipped() {
+    CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
+    assertThat(sut.isSuccessful()).as("is successful").isFalse();
+    assertThat(sut.isFailed()).as("is failed").isFalse();
+    assertThat(sut.isSkipped()).as("is skipped").isFalse();
+    assertThat(sut.isPartial()).as("is partial").isFalse();
+    assertThat(sut.explanation()).as("explanation").isNull();
+    assertThat(sut.unwrap()).as("unwrap").isEmpty();
+  }
+
+  @Test
+  void orFailOnNonSuccessfulCompositeThrows() {
+    CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
+    sut.add(Result.failure("err"));
+    assertThatThrownBy(() -> sut.orFail("composite failed"))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessage("composite failed");
+  }
+
+  @Test
+  void allSuccessCompositeReportsSuccess() {
+    CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
+    sut.add(Result.success("ok1"));
+    sut.add(Result.success("ok2"));
+    CompositeResultAssertions.verifySuccess(sut);
+  }
+
+  @Test
+  void allFailureCompositeReportsFailure() {
+    CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
+    sut.add(Result.failure("err1"));
+    sut.add(Result.failure("err2"));
+    CompositeResultAssertions.verifyFailure(sut, List.of("fallback"));
+  }
+
+  @Test
+  void allSkipsCompositeReportsSkip() {
+    CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
+    sut.add(Result.skip("reason-1"));
+    sut.add(Result.skip("reason-2"));
+    CompositeResultAssertions.verifySkip(sut, List.of("fallback"));
   }
 
 }

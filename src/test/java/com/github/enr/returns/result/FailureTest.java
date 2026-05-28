@@ -2,6 +2,8 @@ package com.github.enr.returns.result;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.MissingFormatArgumentException;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -94,5 +96,16 @@ class FailureTest {
     Assertions.assertThrows(ClassCastException.class, () -> {
       BarError be = result.kind();
     });
+  }
+
+  @Test
+  void failureFromNullStringThrowsNpe() {
+    Assertions.assertThrows(NullPointerException.class, () -> Result.failure((String) null));
+  }
+
+  @Test
+  void failureWithMismatchedFormatArgsThrows() {
+    Assertions.assertThrows(MissingFormatArgumentException.class,
+        () -> Result.failure("error: %s and %s", "only-one-arg"));
   }
 }

@@ -40,11 +40,11 @@ public interface CompositeResultSuccessPolicy<T> {
    * Returns a CompositeResultSuccessPolicy that checks if no results in a collection have failed.
    *
    * @param <T> the type of the result
-   * @return a CompositeResultSuccessPolicy that returns true if no results in the collection have
-   *         failed
+   * @return a CompositeResultSuccessPolicy that returns true if the collection is not empty and no
+   *         results in the collection have failed
    */
   public static <T> CompositeResultSuccessPolicy<T> noError() {
-    return r -> r.stream().noneMatch(Result::isFailed);
+    return r -> !r.isEmpty() && r.stream().noneMatch(Result::isFailed);
   }
 
   /**

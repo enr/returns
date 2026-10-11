@@ -36,7 +36,17 @@ public final class Success<T> implements Result<T> {
 
   @Override
   public Optional<T> toOptional() {
-    return Optional.ofNullable(value);
+    return Optional.of(value);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return obj instanceof Success<?> other && value.equals(other.value);
+  }
+
+  @Override
+  public int hashCode() {
+    return value.hashCode();
   }
 
   @Generated

@@ -31,4 +31,18 @@ class EitherTest {
     assertThat(either.isRight()).as("either is right").isTrue();
   }
 
+  @Test
+  void equality() {
+    assertThat(Either.left("a")).isEqualTo(Either.left("a")).hasSameHashCodeAs(Either.left("a"));
+    assertThat(Either.right("a")).isEqualTo(Either.right("a")).hasSameHashCodeAs(Either.right("a"));
+    assertThat(Either.left("a")).isNotEqualTo(Either.right("a"));
+    assertThat(Either.left("a")).isNotEqualTo(Either.left("b"));
+  }
+
+  @Test
+  void testToString() {
+    assertThat(Either.left("a")).hasToString("Left(a)");
+    assertThat(Either.right("b")).hasToString("Right(b)");
+  }
+
 }

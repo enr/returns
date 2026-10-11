@@ -1,5 +1,7 @@
 package com.github.enr.returns.result.uni;
 
+import java.util.Objects;
+
 import com.github.enr.returns.result.Result;
 import com.github.enr.testexclusions.Generated;
 
@@ -19,6 +21,16 @@ public final class Skip<T> implements Result<T> {
   @Override
   public String explanation() {
     return reason;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return obj instanceof Skip<?> other && Objects.equals(reason, other.reason);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(reason);
   }
 
   @Generated

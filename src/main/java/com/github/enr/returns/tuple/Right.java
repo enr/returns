@@ -2,12 +2,7 @@ package com.github.enr.returns.tuple;
 
 import java.util.NoSuchElementException;
 
-final class Right<L, R> implements Either<L, R> {
-  private final R value;
-
-  public Right(R value) {
-    this.value = value;
-  }
+record Right<L, R>(R right) implements Either<L, R> {
 
   @Override
   public boolean isRight() {
@@ -20,8 +15,7 @@ final class Right<L, R> implements Either<L, R> {
   }
 
   @Override
-  public R right() {
-    return value;
+  public String toString() {
+    return String.format("Right(%s)", right);
   }
-
 }

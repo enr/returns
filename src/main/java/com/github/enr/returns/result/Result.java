@@ -69,7 +69,7 @@ public sealed interface Result<T> permits Success, Failure, Skip, CompositeResul
   /**
    * Return the value if the result is marked as "successful", otherwise return {@code fallback}.
    *
-   * @param other the value to be returned if result is not success, may be null
+   * @param fallback the value to be returned if result is not success, may be null
    * @return the value, if present, otherwise {@code fallback}
    */
   default T orElse(T fallback) {
@@ -132,8 +132,16 @@ public sealed interface Result<T> permits Success, Failure, Skip, CompositeResul
     return failure(ErrorKind.unclassified(), null, errorMessage);
   }
 
+  /**
+   * Builds a failure with a formatted message. If the last argument is a {@link Throwable} it is also
+   * used as the failure cause.
+   */
   public static <T> Result<T> failure(String fmt, Object... args) {
-    return failure(null, fmt, args);
+    Throwable cause = null;
+    if (args != null && args.length > 0 && args[args.length - 1] instanceof Throwable t) {
+      cause = t;
+    }
+    return failure(cause, fmt, args);
   }
 
   public static <T> Result<T> failure(Throwable cause, String fmt, Object... args) {
@@ -146,15 +154,34 @@ public sealed interface Result<T> permits Success, Failure, Skip, CompositeResul
     return failure(cause, errorMessage);
   }
 
-  public static <T> Result<T> copyUnsuccesful(Result<?> source) {
+  /**
+   * Copies an unsuccessful result into a result of a different type, preserving explanation, cause
+   * and (for single failures) the error kind.
+   *
+   * @throws IllegalArgumentException if {@code source} is successful
+   */
+  public static <T> Result<T> copyUnsuccessful(Result<?> source) {
     Result<?> src = Objects.requireNonNull(source, "source must not be null");
-    if (src instanceof Failure f) {
-      Optional<Throwable> cause = src.cause();
-      return Result.failure(cause.orElse(null), f.explanation());
+    if (src instanceof Failure<?> f) {
+      return Result.failure(f.kind(), f.cause().orElse(null), f.explanation());
     }
-    if (src instanceof Skip s) {
+    if (src instanceof Skip<?> s) {
       return Result.skip(s.explanation());
     }
-    throw new IllegalArgumentException("Not an unsuccesful result " + source);
+    if (src instanceof CompositeResult<?> c && c.isUnsuccessful()) {
+      if (c.results().stream().anyMatch(Result::isFailed)) {
+        return Result.failure(ErrorKind.unclassified(), c.cause().orElse(null), c.explanation());
+      }
+      return Result.skip(c.explanation());
+    }
+    throw new IllegalArgumentException("Not an unsuccessful result " + source);
+  }
+
+  /**
+   * @deprecated misspelled, use {@link #copyUnsuccessful(Result)}
+   */
+  @Deprecated
+  public static <T> Result<T> copyUnsuccesful(Result<?> source) {
+    return copyUnsuccessful(source);
   }
 }

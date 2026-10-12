@@ -15,11 +15,11 @@ cd "${prj_home}"
 }
 
 # Update dependencies
-./mvnw -U org.openrewrite.maven:rewrite-maven-plugin:6.16.1:run \
+./mvnw -U org.openrewrite.maven:rewrite-maven-plugin:6.46.1:run \
     -Drewrite.activeRecipes=org.openrewrite.maven.UpgradeDependencyVersion \
     -Drewrite.options='newVersion=latest.release,groupId=*,artifactId=*'
 
 # Update plugins
-./mvnw -U org.openrewrite.maven:rewrite-maven-plugin:6.16.1:run \
+./mvnw -U org.openrewrite.maven:rewrite-maven-plugin:6.46.1:run \
     -Drewrite.activeRecipes=org.openrewrite.maven.UpgradePluginVersion \
     -Drewrite.options='newVersion=latest.release,groupId=*,artifactId=*,addVersionIfMissing=false'

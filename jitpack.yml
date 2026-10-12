@@ -1,6 +1,15 @@
-# JitPack build: Java 25 is not a stock JitPack JDK, install it via SDKMAN
-before_install:
-  - JAVA_ID=$(sdk list java | grep -o "25\.[0-9.]*-tem" | head -1) && sdk install java "$JAVA_ID" && sdk use java "$JAVA_ID"
+# JitPack build: Java 25 is not a stock JitPack JDK, install it via SDKMAN.
+# Each step runs in its own shell (`sdk use` does not persist), so everything happens in one command.
+# Maven is downloaded from archive.apache.org: from JitPack, the repo.maven.apache.org download
+# (used by both mvnw and SDKMAN) fails or comes back corrupt.
 install:
-  - java -version
-  - ./mvnw --batch-mode --no-transfer-progress install -DskipTests
+  - JAVA_ID=$(sdk list java | grep -o "25\.[0-9.]*-tem" | head -1)
+    && sdk install java "$JAVA_ID" && sdk use java "$JAVA_ID"
+    && MVN_VERSION=3.10.0
+    && MVN_URL=https://archive.apache.org/dist/maven/maven-3/$MVN_VERSION/binaries/apache-maven-$MVN_VERSION-bin.tar.gz
+    && curl -fsSL -o /tmp/maven.tar.gz "$MVN_URL"
+    && echo "$(curl -fsSL "$MVN_URL.sha512" | cut -d' ' -f1)  /tmp/maven.tar.gz" | sha512sum -c -
+    && tar -xzf /tmp/maven.tar.gz -C /tmp
+    && export PATH=/tmp/apache-maven-$MVN_VERSION/bin:$PATH
+    && java -version && mvn -version
+    && mvn --batch-mode --no-transfer-progress install -DskipTests

@@ -57,11 +57,24 @@ public final class Failure<T> implements Result<T> {
     return UnclassifiedError.INSTANCE.equals(kind);
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    return obj instanceof Failure<?> other && kind.equals(other.kind) && message.equals(other.message)
+        && Objects.equals(cause, other.cause);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(kind, message, cause);
+  }
+
   @Generated
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    builder.append("Failure [message=");
+    builder.append("Failure [kind=");
+    builder.append(kind);
+    builder.append(", message=");
     builder.append(message);
     builder.append(", cause=");
     builder.append(cause);

@@ -79,9 +79,60 @@ class CompositeResultTest {
     CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.atLeastOne());
     sut.add(Result.success("ok"));
     sut.add(Result.failure("err"));
-    assertThat(sut.isSuccessful()).as("atLeastOne: one success → successful").isTrue();
     assertThat(sut.isFailed()).as("atLeastOne: one failure → failed").isTrue();
+    assertThat(sut.isSuccessful()).as("atLeastOne: failure takes precedence over success").isFalse();
     assertThat(sut.isSkipped()).as("atLeastOne: no skip → not skipped").isFalse();
+    assertThat(sut.orElse(List.of("fallback"))).as("fallback").containsExactly("fallback");
+  }
+
+  @Test
+  void atLeastOneSuccessTakesPrecedenceOverSkip() {
+    CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.atLeastOne());
+    sut.add(Result.success("ok"));
+    sut.add(Result.skip("skipped"));
+    assertThat(sut.isSuccessful()).as("is successful").isTrue();
+    assertThat(sut.isSkipped()).as("success takes precedence over skip").isFalse();
+    assertThat(sut.isFailed()).as("is failed").isFalse();
+    assertThat(sut.explanation()).as("successful composite has no explanation").isNull();
+  }
+
+  @Test
+  void atLeastOneFailureTakesPrecedenceOverSkip() {
+    CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.atLeastOne());
+    sut.add(Result.failure("err"));
+    sut.add(Result.skip("skipped"));
+    assertThat(sut.isFailed()).as("is failed").isTrue();
+    assertThat(sut.isSkipped()).as("failure takes precedence over skip").isFalse();
+    assertThat(sut.explanation()).as("explanation").contains("err").doesNotContain("skipped");
+  }
+
+  @Test
+  void skippedCompositeExplainsSkipReasons() {
+    CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
+    sut.add(Result.skip("reason-1"));
+    sut.add(Result.skip("reason-2"));
+    assertThat(sut.explanation()).as("explanation").contains("2 skipped").contains("reason-1").contains("reason-2");
+  }
+
+  @Test
+  void causeIsFirstFailureCause() {
+    Exception cause1 = new Exception("first");
+    Exception cause2 = new Exception("second");
+    CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
+    sut.add(Result.failure("no cause"));
+    sut.add(Result.failure(cause1, "err1"));
+    sut.add(Result.failure(cause2, "err2"));
+    assertThat(sut.cause()).as("cause").contains(cause1);
+  }
+
+  @Test
+  void nullArgumentsAreRejected() {
+    CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
+    assertThatThrownBy(() -> sut.add(null)).isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> sut.addAll(null)).isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> CompositeResult.<String>empty(null)).isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> CompositeResult.empty(new CompositeResultPolicies<String>(null, null, null)))
+        .isInstanceOf(NullPointerException.class);
   }
 
   @Test
@@ -103,8 +154,7 @@ class CompositeResultTest {
     CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
     sut.add(Result.success("a"));
     Collection<Result<String>> snapshot = sut.results();
-    assertThatThrownBy(() -> snapshot.add(Result.success("b")))
-        .isInstanceOf(UnsupportedOperationException.class);
+    assertThatThrownBy(() -> snapshot.add(Result.success("b"))).isInstanceOf(UnsupportedOperationException.class);
   }
 
   @Test
@@ -131,8 +181,7 @@ class CompositeResultTest {
   void orFailOnNonSuccessfulCompositeThrows() {
     CompositeResult<String> sut = CompositeResult.empty(CompositeResultPolicies.all());
     sut.add(Result.failure("err"));
-    assertThatThrownBy(() -> sut.orFail("composite failed"))
-        .isInstanceOf(IllegalStateException.class)
+    assertThatThrownBy(() -> sut.orFail("composite failed")).isInstanceOf(IllegalStateException.class)
         .hasMessage("composite failed");
   }
 

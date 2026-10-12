@@ -19,4 +19,15 @@ class TripletTest {
     assertThat(sut.third()).as("third").isEqualTo(third);
   }
 
+  @Test
+  void equality() {
+    assertThat(Triplet.of(1, "a", 2L)).isEqualTo(Triplet.of(1, "a", 2L)).hasSameHashCodeAs(Triplet.of(1, "a", 2L));
+    assertThat(Triplet.of(1, "a", 2L)).isNotEqualTo(Triplet.of(1, "a", 3L));
+  }
+
+  @Test
+  void testToString() {
+    assertThat(Triplet.of(1, "a", 2L)).hasToString("Triplet(1, a, 2)");
+  }
+
 }

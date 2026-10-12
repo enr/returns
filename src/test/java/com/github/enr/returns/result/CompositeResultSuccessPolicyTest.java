@@ -38,7 +38,7 @@ class CompositeResultSuccessPolicyTest {
   @Test
   void testNoError() {
     CompositeResultSuccessPolicy<String> sut = CompositeResultSuccessPolicy.noError();
-    assertThat(sut.apply(List.of())).as("empty — vacuously no errors").isTrue();
+    assertThat(sut.apply(List.of())).as("empty").isFalse();
     assertThat(sut.apply(List.of(Result.success("ok")))).as("all success").isTrue();
     assertThat(sut.apply(List.of(Result.skip("skip")))).as("only skips").isTrue();
     assertThat(sut.apply(List.of(Result.failure("err")))).as("one failure").isFalse();

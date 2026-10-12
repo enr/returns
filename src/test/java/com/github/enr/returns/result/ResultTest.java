@@ -30,7 +30,7 @@ class ResultTest {
   void testCopyUnsuccessfulOnfailure() {
     String errorMessage = "error-" + RandomStrings.withLength(6);
     Result<String> source = Result.failure(new Exception(), errorMessage);
-    Result<String> sut = Result.copyUnsuccesful(source);
+    Result<String> sut = Result.copyUnsuccessful(source);
     assertThat(sut.explanation()).as("error").isEqualTo(source.explanation());
     assertThat(sut.cause()).as("cause").isEqualTo(source.cause());
   }
@@ -39,7 +39,7 @@ class ResultTest {
   void testCopyUnsuccessfulOnSkip() {
     String message = "error-" + RandomStrings.withLength(6);
     Result<String> source = Result.skip(message);
-    Result<String> sut = Result.copyUnsuccesful(source);
+    Result<String> sut = Result.copyUnsuccessful(source);
     assertThat(sut.explanation()).as("explanation").isEqualTo(source.explanation());
     assertThat(sut.cause()).as("cause").isEqualTo(source.cause());
   }
@@ -47,12 +47,12 @@ class ResultTest {
   @Test
   void testCopyUnsuccessfulOnSuccess() {
     Result<Nothing> source = Result.success();
-    Assertions.assertThrows(IllegalArgumentException.class, () -> Result.copyUnsuccesful(source));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> Result.copyUnsuccessful(source));
   }
 
   @Test
   void testCopyUnsuccessfulOnNull() {
-    Assertions.assertThrows(NullPointerException.class, () -> Result.copyUnsuccesful(null));
+    Assertions.assertThrows(NullPointerException.class, () -> Result.copyUnsuccessful(null));
   }
 
   @Test
@@ -140,11 +140,90 @@ class ResultTest {
     Assertions.assertThrows(IllegalStateException.class, () -> result.kind());
   }
 
+  enum TestKind implements ErrorKind {
+    NOT_FOUND
+  }
+
   @Test
-  void copyUnsuccesfulOnCompositeThrowsIllegalArgument() {
+  void copyUnsuccessfulPreservesErrorKind() {
+    Result<String> source = Result.failure(TestKind.NOT_FOUND, "missing");
+    Result<Integer> sut = Result.copyUnsuccessful(source);
+    assertThat(sut.isFailed()).as("is failed").isTrue();
+    assertThat(sut.is(TestKind.class)).as("kind preserved").isTrue();
+    assertThat(sut.isUnclassified()).as("is unclassified").isFalse();
+    assertThat((TestKind) sut.kind()).as("kind").isEqualTo(TestKind.NOT_FOUND);
+  }
+
+  @Test
+  @SuppressWarnings("deprecation")
+  void deprecatedCopyUnsuccesfulDelegates() {
+    Result<String> source = Result.failure(TestKind.NOT_FOUND, "missing");
+    Result<Integer> sut = Result.copyUnsuccesful(source);
+    assertThat(sut.is(TestKind.class)).as("kind preserved").isTrue();
+    assertThat(sut.explanation()).as("explanation").isEqualTo("missing");
+  }
+
+  @Test
+  void copyUnsuccessfulOnFailedComposite() {
+    Exception cause = new Exception("boom");
     CompositeResult<String> composite = CompositeResult.empty(CompositeResultPolicies.all());
+    composite.add(Result.failure("err1"));
+    composite.add(Result.failure(cause, "err2"));
+    Result<Integer> sut = Result.copyUnsuccessful(composite);
+    assertThat(sut.isFailed()).as("is failed").isTrue();
+    assertThat(sut.explanation()).as("explanation").contains("err1").contains("err2");
+    assertThat(sut.cause()).as("cause").contains(cause);
+  }
+
+  @Test
+  void copyUnsuccessfulOnPartialComposite() {
+    CompositeResult<String> composite = CompositeResult.empty(CompositeResultPolicies.all());
+    composite.add(Result.success("ok"));
     composite.add(Result.failure("err"));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> Result.copyUnsuccesful(composite));
+    Result<Integer> sut = Result.copyUnsuccessful(composite);
+    assertThat(sut.isFailed()).as("is failed").isTrue();
+    assertThat(sut.explanation()).as("explanation").contains("err");
+  }
+
+  @Test
+  void copyUnsuccessfulOnSkippedComposite() {
+    CompositeResult<String> composite = CompositeResult.empty(CompositeResultPolicies.all());
+    composite.add(Result.skip("reason-1"));
+    composite.add(Result.skip("reason-2"));
+    Result<Integer> sut = Result.copyUnsuccessful(composite);
+    assertThat(sut.isSkipped()).as("is skipped").isTrue();
+    assertThat(sut.explanation()).as("explanation").contains("reason-1").contains("reason-2");
+  }
+
+  @Test
+  void copyUnsuccessfulOnSuccessfulCompositeThrows() {
+    CompositeResult<String> composite = CompositeResult.empty(CompositeResultPolicies.all());
+    composite.add(Result.success("ok"));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> Result.copyUnsuccessful(composite));
+  }
+
+  @Test
+  void formattedFailureUsesTrailingThrowableAsCause() {
+    Exception cause = new Exception("boom");
+    Result<String> sut = Result.failure("error on %s: %s", "item", cause);
+    assertThat(sut.explanation()).as("explanation").isEqualTo("error on item: java.lang.Exception: boom");
+    assertThat(sut.cause()).as("cause").contains(cause);
+  }
+
+  @Test
+  void formattedFailureWithoutThrowableHasNoCause() {
+    Result<String> sut = Result.failure("error on %s", "item");
+    assertThat(sut.explanation()).as("explanation").isEqualTo("error on item");
+    assertThat(sut.cause()).as("cause").isEmpty();
+    assertThat(sut.isUnclassified()).as("is unclassified").isTrue();
+  }
+
+  @Test
+  void formattedFailureWithExplicitCause() {
+    Exception cause = new Exception("boom");
+    Result<String> sut = Result.failure(cause, "error on %s", "item");
+    assertThat(sut.explanation()).as("explanation").isEqualTo("error on item");
+    assertThat(sut.cause()).as("cause").contains(cause);
   }
 
   @Test

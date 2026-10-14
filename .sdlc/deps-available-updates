@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+#
+# Reports the available updates for the versions this project declares itself:
+# parent POM, version properties, dependencies and plugins with an explicit version,
+# build extensions.
+#
+# Versions inherited from an imported BOM or from a parent POM (for example Jackson
+# from the Quarkus BOM) are not reported: they follow the BOM, and updating the BOM
+# updates them.
+#
+# Settings, as environment variables or in an optional .sdlc/deps.env file:
+#   DEPS_VERSIONS_PLUGIN    versions-maven-plugin version
+#   DEPS_IGNORE_VERSIONS    regex of the versions to ignore (default: pre-releases)
+#   DEPS_EXCLUDES           comma separated groupId:artifactId patterns to skip
+#   DEPS_EXCLUDE_PROPERTIES comma separated version properties to skip
+#   DEPS_MAVEN_ARGS         extra Maven arguments, e.g. "-Pexamples"
+# Script arguments are passed to Maven as well.
+
+set -e
+
+tool_source="${BASH_SOURCE[0]}"
+while [ -h "$tool_source" ] ; do tool_source="$(readlink "$tool_source")"; done
+sdlc_dir="$( cd -P "$( dirname "$tool_source" )" && pwd )"
+prj_home="$( cd -P "$( dirname "$sdlc_dir" )" && pwd )"
+
+cd "${prj_home}"
+
+# shellcheck source=/dev/null
+[[ -f "${sdlc_dir}/deps.env" ]] && source "${sdlc_dir}/deps.env"
+
+if [[ -x ./mvnw ]]; then
+  mvn_cmd='./mvnw'
+elif hash mvn 2>/dev/null; then
+  mvn_cmd='mvn'
+else
+  echo 'No Maven executable: aborting'
+  exit 1
+fi
+
+versions_plugin="org.codehaus.mojo:versions-maven-plugin:${DEPS_VERSIONS_PLUGIN:-2.23.0}"
+ignore_versions="${DEPS_IGNORE_VERSIONS:-(?i).*[-.](alpha|beta|rc|cr|m|ea|preview|snapshot)[-.]?\d*\b.*}"
+# Entries such as ${project.groupId}:module are the project's own modules: without this
+# exclusion display-dependency-updates fails on them, because it does not interpolate them.
+excludes="\$*:*${DEPS_EXCLUDES:+,${DEPS_EXCLUDES}}"
+
+# shellcheck disable=SC2206
+maven_args=(-B -ntp ${DEPS_MAVEN_ARGS:-} "-Dmaven.version.ignore=${ignore_versions}"
+  -Dversions.outputLineWidth=250 "$@")
+property_args=()
+if [[ -n "${DEPS_EXCLUDE_PROPERTIES:-}" ]]; then
+  property_args=("-DexcludeProperties=${DEPS_EXCLUDE_PROPERTIES}")
+fi
+
+# Turns a versions plugin output into "name current -> newest" lines, one per name with
+# its highest version. Dropped: lines that are not upgrades (when a project does not
+# declare its minimum Maven version, display-plugin-updates also lists older versions,
+# grouped by the Maven version they require) and versions set through a property
+# (reported by display-property-updates).
+newer_versions() {
+  grep -F -- ' -> ' \
+    | awk '{ print $2 "\t" $(NF-2) "\t" $NF }' \
+    | sort -t $'\t' -k1,1 -k3,3V \
+    | awk -F '\t' '{ last[$1] = $0 } END { for (name in last) print last[name] }' \
+    | while IFS=$'\t' read -r name current newest; do
+        [[ "${current}" == "${newest}" || "${current}" == '$'* ]] && continue
+        [[ "$(printf '%s\n%s\n' "${current}" "${newest}" | sort -V | tail -n 1)" == "${newest}" ]] || continue
+        printf '  %-60s %s -> %s\n' "${name}" "${current}" "${newest}"
+      done \
+    | sort
+}
+
+# Runs a versions plugin goal and prints the available updates.
+updates() {
+  local goal="$1"
+  shift
+  local output
+  output="$("${mvn_cmd}" "${maven_args[@]}" "$@" "${versions_plugin}:${goal}")" || {
+    echo "${output}" >&2
+    echo "versions:${goal} failed: aborting" >&2
+    exit 1
+  }
+  local lines
+  lines="$(newer_versions <<< "${output}")"
+  echo "${lines:-  none}"
+}
+
+echo '--- Parent'
+updates display-parent-updates
+echo '--- Properties'
+updates display-property-updates "${property_args[@]}"
+echo '--- Dependencies'
+# Only versions written in the POMs: no BOM-managed entries, no version-less dependencies.
+updates display-dependency-updates -DprocessDependencyManagementTransitive=false -DshowVersionless=false \
+    "-DdependencyExcludes=${excludes}" "-DdependencyManagementExcludes=${excludes}"
+echo '--- Plugins'
+updates display-plugin-updates
+echo '--- Extensions'
+updates display-extension-updates
